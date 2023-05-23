@@ -50,12 +50,60 @@ archivos_excel_ctc = ['C:\\Users\\damian.pulgarin\\OneDrive - arus.com.co\\ASIGN
 dtfs= []
 for archivo in archivos_excel_ctc:
     archivos_ctc = pd.read_excel(archivo)
+    
 #archivos_ctc = pd.read_excel(archivos_excel_ctc)
+
 
 print(archivos_ctc.columns)
 
+######################################################
+#ruta_archivos_ctc = 'ARCHIVOS CTC'
+
+# Nombre del archivo de consolidado general PBS
+archivo_consolidado = 'C:\\Users\\damian.pulgarin\\OneDrive - arus.com.co\\ASIGNACION PBS\\CONSOLIDADO_PBS\\CONSOLIDADO GENERAL PBS .csv'
+
+# Columnas relevantes para el cruce
+columnas_relevantes = ['ENVIO A SURA', 'RESPONSABLE', 'ASIGNACIÓN', 'FECHA DE ENVIÓ ARUS', 'NUMERO DE ENVIO']
+
+# Leer el archivo de consolidado general PBS
+df_consolidado = pd.read_csv(archivo_consolidado, delimiter=';')
+
+print(df_consolidado.columns)
+
+
+# Obtener el número de envío actual
+num_envio_actual = df_consolidado['NUMERO DE ENVIO'].max() + 1
+
+# Iterar sobre los archivos de la carpeta CTC
+for archivo in os.listdir(archivos_excel_ctc):
+    if archivo.endswith('.xlsx'):
+        ruta_archivo = os.path.join(archivos_excel_ctc, archivo)
+        df_ctc = pd.read_excel(ruta_archivo, usecols=columnas_relevantes)
+
+        # Filtrar las filas según los criterios mencionados
+        filtro_envio_sura = df_ctc['ENVIO A SURA'].str.contains('pendiente|nuevo', case=False, na=False)
+        filtro_responsable = df_ctc['RESPONSABLE'].str.contains('AUX ARUS|QF ARUS|QF POLIZA', case=False, na=False)
+        filtro_fecha_envio = df_ctc['FECHA DE ENVIÓ ARUS'].str.contains('PTE ANDREA', case=False, na=False)
+
+        # Actualizar las filas que cumplan los criterios
+        df_ctc.loc[filtro_envio_sura, 'ENVIO A SURA'] = 'pendiente'
+        df_ctc.loc[filtro_responsable, 'RESPONSABLE'] = 'AUX ARUS / QF ARUS / QF POLIZA'
+        df_ctc.loc[filtro_fecha_envio & ~filtro_envio_sura, 'FECHA DE ENVIÓ ARUS'] = pd.to_datetime(df_ctc['G']).dt.strftime('%d/%m/%Y')
+        df_ctc.loc[filtro_fecha_envio & filtro_envio_sura, 'FECHA DE ENVIÓ ARUS'] = pd.to_datetime(df_ctc['G']).dt.strftime('%d/%m/%Y')
+        df_ctc.loc[~filtro_fecha_envio & ~filtro_envio_sura, 'NUMERO DE ENVIO'] = num_envio_actual
+
+        # Concatenar el DataFrame procesado al consolidado
+        df_consolidado = pd.concat([df_consolidado, df_ctc], ignore_index=True)
+
+        # Incrementar el número de envío actual
+        num_envio_actual += 1
+
+# Guardar el consolidado final en un nuevo archivo
+archivo_consolidado_final = 'CONSOLIDADO_GENERAL_PBS_FINAL.xlsx'
+df_consolidado.to_excel(archivo_consolidado_final, index=False)
+
 # Realizar el cruce de los archivos
-archivos_ctc["ENVIO A SURA"] = archivos_ctc["ENVIO A SURA"].apply(lambda x: "pendiente" if pd.isnull(x) or x == "PENDIENTE" else x)
+"""archivos_ctc["ENVIO A SURA"] = archivos_ctc["ENVIO A SURA"].apply(lambda x: "pendiente" if pd.isnull(x) or x == "PENDIENTE" else x)
 archivos_ctc["RESPONSABLE"] = archivos_ctc["ASIGNACIÓN"].map({
         "AUX ARUS": "AUX ARUS",
         "AUX ARUS ANTICOAGULANTES": "AUX ARUS ANTICOAGULANTES",
@@ -149,4 +197,4 @@ cruzar_archivos()
 generar_carpeta_asignacion()
 completar_resultados()
 
-# Código posterior
+# Código posterior"""
