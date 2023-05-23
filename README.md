@@ -19,7 +19,7 @@ Inicio
 │   │   │       ├─ Actualizar columnas específicas para asignar tarea al equipo "AUX ARUS ANTICOAGULANTES"
 │   │   │       └─ Continuar con el siguiente paso
 │   │   └─ No ──┐
-│   │           ├─ Buscar en el dataframe "MALLA PX NO PBS.csv" coincidencia entre "SURACUPS" y "CODIGO_PRESTACION"
+│   │           ├─ Buscar en el dataframe "MALLA PX NO PBS.csv" coincidencia entre "SURACUPS" y "CODIGO_PRESTACION"   
 │   │           ├─ ¿Se encontró una coincidencia?
 │   │           │   ├─ Sí ──┐
 │   │           │   │       ├─ ¿El valor de la columna 6 en la coincidencia es "ARUS verificar criterios PBS"?

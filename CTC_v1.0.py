@@ -40,13 +40,20 @@ def cruzar_archivos():
                     print(f"Error: {e}")
 
 # Convertir la lista de líneas en un DataFrame de pandas
-consolidado_pbs = pd.DataFrame(lines)
+    consolidado_pbs = pd.DataFrame(lines)
 
-    # Cargar el archivo "ARCHIVOS CTC"
-archivos_ctc = pd.read_excel("ASIGNACION PBS/ARCHIVOS CTC/ARCHIVOS CTC.xlsx")
+# Cargar el archivo "ARCHIVOS CTC"
+archivos_excel_ctc = ['C:\\Users\\damian.pulgarin\\OneDrive - arus.com.co\\ASIGNACION PBS\\ARCHIVOS CTC\\INFORME-SAS-PENDIENTES-20230519062906.xls', 
+                      'C:\\Users\\damian.pulgarin\\OneDrive - arus.com.co\\ASIGNACION PBS\\ARCHIVOS CTC\\INFORME-SAS-PENDIENTES-20230519062914.xls', 
+                      'C:\\Users\\damian.pulgarin\\OneDrive - arus.com.co\\ASIGNACION PBS\\ARCHIVOS CTC\\INFORME-SAS-PENDIENTES-INTERNET-20230519062909.xls', 
+                      'C:\\Users\\damian.pulgarin\\OneDrive - arus.com.co\\ASIGNACION PBS\\ARCHIVOS CTC\\INFORME-SAS-PENDIENTES-INTERNET-20230519062920.xls']
+dtfs= []
+for archivo in archivos_excel_ctc:
+    archivos_ctc = pd.read_excel(archivo)
+#archivos_ctc = pd.read_excel(archivos_excel_ctc)
     
 
-    # Realizar el cruce de los archivos
+# Realizar el cruce de los archivos
 archivos_ctc["ENVIO A SURA"] = archivos_ctc["ENVIO A SURA"].apply(lambda x: "pendiente" if pd.isnull(x) or x == "PENDIENTE" else x)
 archivos_ctc["RESPONSABLE"] = archivos_ctc["ASIGNACIÓN"].map({
         "AUX ARUS": "AUX ARUS",
