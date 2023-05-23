@@ -26,7 +26,7 @@ def cruzar_archivos():
     # Cargar el archivo "CONSOLIDADO GENERAL PBS"
     
     #consolidado_pbs = pd.read_csv(r"C:\Users\damian.pulgarin\OneDrive - arus.com.co\ASIGNACION PBS\CONSOLIDADO_PBS\CONSOLIDADO_GENERAL_PBS.csv")
-    filename = r"C:\Users\damian.pulgarin\OneDrive - arus.com.co\ASIGNACION PBS\CONSOLIDADO_PBS\CONSOLIDADO_GENERAL_PBS.csv"
+    filename = r"C:\Users\damian.pulgarin\OneDrive - arus.com.co\ASIGNACION PBS\CONSOLIDADO_PBS\CONSOLIDADO GENERAL PBS .csv"
 
 # Leer el archivo CSV línea por línea y manejar las líneas problemáticas
     lines = []
@@ -51,7 +51,8 @@ dtfs= []
 for archivo in archivos_excel_ctc:
     archivos_ctc = pd.read_excel(archivo)
 #archivos_ctc = pd.read_excel(archivos_excel_ctc)
-    
+
+print(archivos_ctc.columns)
 
 # Realizar el cruce de los archivos
 archivos_ctc["ENVIO A SURA"] = archivos_ctc["ENVIO A SURA"].apply(lambda x: "pendiente" if pd.isnull(x) or x == "PENDIENTE" else x)
@@ -148,5 +149,4 @@ cruzar_archivos()
 generar_carpeta_asignacion()
 completar_resultados()
 
-# Código posterior...
-pp
+# Código posterior
