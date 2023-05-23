@@ -24,10 +24,12 @@ else:
 
 def cruzar_archivos():
     # Cargar el archivo "CONSOLIDADO GENERAL PBS"
-    consolidado_pbs = pd.read_excel("ASIGNACION PBS/CONSOLIDADO_PBS/CONSOLIDADO GENERAL PBS.xlsx")
+    consolidado_pbs = pd.read_excel(r"C:\Users\santiago.patino\Desktop\ASIGNACION PBS\CONSOLIDADO_PBS\CONSOLIDADO GENERAL PBS.xlsx")
+
 
     # Cargar el archivo "ARCHIVOS CTC"
     archivos_ctc = pd.read_excel("ASIGNACION PBS/ARCHIVOS CTC/ARCHIVOS CTC.xlsx")
+    
 
     # Realizar el cruce de los archivos
     archivos_ctc["ENVIO A SURA"] = archivos_ctc["ENVIO A SURA"].apply(lambda x: "pendiente" if pd.isnull(x) or x == "PENDIENTE" else x)
