@@ -1,5 +1,7 @@
 import os
 import pandas as pd
+import glob
+
 # Ruta de la carpeta principal
 ruta_principal = r"C:\Users\damian.pulgarin\OneDrive - arus.com.co\ASIGNACION PBS"
 
@@ -43,18 +45,28 @@ def cruzar_archivos():
     consolidado_pbs = pd.DataFrame(lines)
 
 # Cargar el archivo "ARCHIVOS CTC"
-archivos_excel_ctc = ['C:\\Users\\damian.pulgarin\\OneDrive - arus.com.co\\ASIGNACION PBS\\ARCHIVOS CTC\\INFORME-SAS-PENDIENTES-20230519062906.xls', 
+"""archivos_excel_ctc = ['C:\\Users\\damian.pulgarin\\OneDrive - arus.com.co\\ASIGNACION PBS\\ARCHIVOS CTC\\INFORME-SAS-PENDIENTES-20230519062906.xls', 
                       'C:\\Users\\damian.pulgarin\\OneDrive - arus.com.co\\ASIGNACION PBS\\ARCHIVOS CTC\\INFORME-SAS-PENDIENTES-20230519062914.xls', 
                       'C:\\Users\\damian.pulgarin\\OneDrive - arus.com.co\\ASIGNACION PBS\\ARCHIVOS CTC\\INFORME-SAS-PENDIENTES-INTERNET-20230519062909.xls', 
                       'C:\\Users\\damian.pulgarin\\OneDrive - arus.com.co\\ASIGNACION PBS\\ARCHIVOS CTC\\INFORME-SAS-PENDIENTES-INTERNET-20230519062920.xls']
-dtfs= []
+
 for archivo in archivos_excel_ctc:
-    archivos_ctc = pd.read_excel(archivo)
+    archivos_ctc = pd.read_excel(archivo)"""
+
+ruta_base = 'C:\\Users\\damian.pulgarin\\OneDrive - arus.com.co\\ASIGNACION PBS\\ARCHIVOS CTC\\'
+patron = 'INFORME-SAS-PENDIENTES-*.xls'
+
+archivos_excel_ctc = glob.glob(ruta_base + patron)
+
+
+#for archivo in archivos_excel_ctc:
+    # Realizar alguna operación con el archivo
+    #print(archivo)
     
 #archivos_ctc = pd.read_excel(archivos_excel_ctc)
 
 
-print(archivos_ctc.columns)
+#print(archivos_ctc.columns)
 
 ######################################################
 #ruta_archivos_ctc = 'ARCHIVOS CTC'
@@ -66,18 +78,17 @@ archivo_consolidado = 'C:\\Users\\damian.pulgarin\\OneDrive - arus.com.co\\ASIGN
 columnas_relevantes = ['ENVIO A SURA', 'RESPONSABLE', 'ASIGNACIÓN', 'FECHA DE ENVIÓ ARUS', 'NUMERO DE ENVIO']
 
 # Leer el archivo de consolidado general PBS
-df_consolidado = pd.read_csv(archivo_consolidado, delimiter=';')
+df_consolidado = pd.read_csv(archivo_consolidado, delimiter=';', low_memory=False)
 
-print(df_consolidado.columns)
+#print(df_consolidado.columns)
 
 
 # Obtener el número de envío actual
 num_envio_actual = df_consolidado['NUMERO DE ENVIO'].max() + 1
 
 # Iterar sobre los archivos de la carpeta CTC
-for archivo in os.listdir(archivos_excel_ctc):
-    if archivo.endswith('.xlsx'):
-        ruta_archivo = os.path.join(archivos_excel_ctc, archivo)
+for ruta_archivo in archivos_excel_ctc:
+    if ruta_archivo.endswith('.xlsx'):
         df_ctc = pd.read_excel(ruta_archivo, usecols=columnas_relevantes)
 
         # Filtrar las filas según los criterios mencionados
