@@ -1,5 +1,7 @@
 import os
 import pandas as pd
+
+    
 # Ruta de la carpeta principal
 ruta_principal = r"C:\Users\santiago.patino\OneDrive - arus.com.co\ASIGNACION PBS"
 
@@ -18,16 +20,9 @@ if carpetas_faltantes:
 else:
     print("Todas las carpetas existen. Puedes continuar con el programa.")
 
-# cruce de archivos y actualizar columnas
-# Código para cruzar los archivos según las condiciones mencionadas en el manual
-# Actualizar las columnas correspondientes en el archivo "ARCHIVOS CTC"
-
-def cruzar_archivos():
-    # Cargar el archivo "CONSOLIDADO GENERAL PBS"
-    
-    #consolidado_pbs = pd.read_csv(r"C:\Users\damian.pulgarin\OneDrive - arus.com.co\ASIGNACION PBS\CONSOLIDADO_PBS\CONSOLIDADO_GENERAL_PBS.csv")
+# funcion de cruce de archivos y actualizar columnas
+def cruzar_archivos():    
     filename = r"C:\Users\santiago.patino\OneDrive - arus.com.co\ASIGNACION PBS\CONSOLIDADO_PBS\CONSOLIDADO GENERAL PBS .csv"
-
 # Leer el archivo CSV línea por línea y manejar las líneas problemáticas
     lines = []
     with open(filename, 'r') as file:
@@ -38,10 +33,8 @@ def cruzar_archivos():
                 except Exception as e:
                     print(f"Error en la línea: {line}")
                     print(f"Error: {e}")
-
 # Convertir la lista de líneas en un DataFrame de pandas
     consolidado_pbs = pd.DataFrame(lines)
-
 # Cargar el archivo "ARCHIVOS CTC"
 archivos_excel_ctc = ['C:\\Users\\santiago.patino\\OneDrive - arus.com.co\\ASIGNACION PBS\\ARCHIVOS CTC\\INFORME-SAS-PENDIENTES-20230519062906.xls', 
                       'C:\\Users\\santiago.patino\\OneDrive - arus.com.co\\ASIGNACION PBS\\ARCHIVOS CTC\\INFORME-SAS-PENDIENTES-20230519062914.xls', 
@@ -50,15 +43,7 @@ archivos_excel_ctc = ['C:\\Users\\santiago.patino\\OneDrive - arus.com.co\\ASIGN
 dtfs= []
 for archivo in archivos_excel_ctc:
     archivos_ctc = pd.read_excel(archivo)
-    
-#archivos_ctc = pd.read_excel(archivos_excel_ctc)
-
-
-print(archivos_ctc.columns)
-
 ######################################################
-#ruta_archivos_ctc = 'ARCHIVOS CTC'
-
 # Nombre del archivo de consolidado general PBS
 archivo_consolidado = 'C:\\Users\\santiago.patino\\OneDrive - arus.com.co\\ASIGNACION PBS\\CONSOLIDADO_PBS\\CONSOLIDADO GENERAL PBS .csv'
 
@@ -66,41 +51,40 @@ archivo_consolidado = 'C:\\Users\\santiago.patino\\OneDrive - arus.com.co\\ASIGN
 columnas_relevantes = ['ENVIO A SURA', 'RESPONSABLE', 'ASIGNACIÓN', 'FECHA DE ENVIÓ ARUS', 'NUMERO DE ENVIO']
 
 # Leer el archivo de consolidado general PBS
-df_consolidado = pd.read_csv(archivo_consolidado, delimiter=';')
-
-print(df_consolidado.columns)
-
+df_consolidado = pd.read_csv(archivo_consolidado, delimiter=';',low_memory=False)
 
 # Obtener el número de envío actual
 num_envio_actual = df_consolidado['NUMERO DE ENVIO'].max() + 1
 
-# Iterar sobre los archivos de la carpeta CTC
-for archivo in os.listdir(archivos_excel_ctc):
-    if archivo.endswith('.xlsx'):
-        ruta_archivo = os.path.join(archivos_excel_ctc, archivo)
-        df_ctc = pd.read_excel(ruta_archivo, usecols=columnas_relevantes)
+# Funcion para la leer los archivos ubicados en la lista archivos_excel_ctc
+def leer_archivos(archivos_excel_ctc, archivo_consolidado):
+    df_consolidado = pd.read_csv(archivo_consolidado, delimiter=';',low_memory=False)
 
-        # Filtrar las filas según los criterios mencionados
-        filtro_envio_sura = df_ctc['ENVIO A SURA'].str.contains('pendiente|nuevo', case=False, na=False)
-        filtro_responsable = df_ctc['RESPONSABLE'].str.contains('AUX ARUS|QF ARUS|QF POLIZA', case=False, na=False)
-        filtro_fecha_envio = df_ctc['FECHA DE ENVIÓ ARUS'].str.contains('PTE ANDREA', case=False, na=False)
+    num_envio_actual = df_consolidado['NUMERO DE ENVIO'].max() + 1
 
-        # Actualizar las filas que cumplan los criterios
-        df_ctc.loc[filtro_envio_sura, 'ENVIO A SURA'] = 'pendiente'
-        df_ctc.loc[filtro_responsable, 'RESPONSABLE'] = 'AUX ARUS / QF ARUS / QF POLIZA'
-        df_ctc.loc[filtro_fecha_envio & ~filtro_envio_sura, 'FECHA DE ENVIÓ ARUS'] = pd.to_datetime(df_ctc['G']).dt.strftime('%d/%m/%Y')
-        df_ctc.loc[filtro_fecha_envio & filtro_envio_sura, 'FECHA DE ENVIÓ ARUS'] = pd.to_datetime(df_ctc['G']).dt.strftime('%d/%m/%Y')
-        df_ctc.loc[~filtro_fecha_envio & ~filtro_envio_sura, 'NUMERO DE ENVIO'] = num_envio_actual
+    for ruta_archivo in archivos_excel_ctc:
+        if ruta_archivo.endswith('.xlsx'):
+            df_ctc = pd.read_excel(ruta_archivo, usecols=columnas_relevantes)
+            filtro_envio_sura = df_ctc['ENVIO A SURA'].str.contains('pendiente|nuevo', case=False, na=False)
+            filtro_responsable = df_ctc['RESPONSABLE'].str.contains('AUX ARUS|QF ARUS|QF POLIZA', case=False, na=False)
+            filtro_fecha_envio = df_ctc['FECHA DE ENVIÓ ARUS'].str.contains('PTE ANDREA', case=False, na=False)
+            df_ctc.loc[filtro_envio_sura, 'ENVIO A SURA'] = 'pendiente'
+            df_ctc.loc[filtro_responsable, 'RESPONSABLE'] = 'AUX ARUS / QF ARUS / QF POLIZA'
+            df_ctc.loc[filtro_fecha_envio & ~filtro_envio_sura, 'FECHA DE ENVIÓ ARUS'] = pd.to_datetime(df_ctc['G']).dt.strftime('%d/%m/%Y')
+            df_ctc.loc[filtro_fecha_envio & filtro_envio_sura, 'FECHA DE ENVIÓ ARUS'] = pd.to_datetime(df_ctc['G']).dt.strftime('%d/%m/%Y')
+            df_ctc.loc[~filtro_fecha_envio & ~filtro_envio_sura, 'NUMERO DE ENVIO'] = num_envio_actual
 
-        # Concatenar el DataFrame procesado al consolidado
-        df_consolidado = pd.concat([df_consolidado, df_ctc], ignore_index=True)
+            df_consolidado = pd.concat([df_consolidado, df_ctc], ignore_index=True)
+            num_envio_actual += 1
+    archivo_consolidado_final = 'CONSOLIDADO_GENERAL_PBS_FINAL.xlsx'
+    df_consolidado.to_excel(archivo_consolidado_final, index=False)
+leer_archivos(archivos_excel_ctc,archivo_consolidado)
 
-        # Incrementar el número de envío actual
-        num_envio_actual += 1
 
 # Guardar el consolidado final en un nuevo archivo
 archivo_consolidado_final = 'CONSOLIDADO_GENERAL_PBS_FINAL.xlsx'
 df_consolidado.to_excel(archivo_consolidado_final, index=False)
+print("el archivo CONSOLIDADO_GENERAL_PBS_FINAL.xlsx se creo con exito ")
 
 # Realizar el cruce de los archivos
 """archivos_ctc["ENVIO A SURA"] = archivos_ctc["ENVIO A SURA"].apply(lambda x: "pendiente" if pd.isnull(x) or x == "PENDIENTE" else x)
