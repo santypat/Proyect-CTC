@@ -88,3 +88,66 @@ for ruta_archivo in archivos_excel_ctc:
 # Guardar el consolidado final en un nuevo archivo
 archivo_consolidado_final = 'CONSOLIDADO_GENERAL_PBS_FINAL.xlsx'
 df_consolidado.to_excel(archivo_consolidado_final, index=False)
+
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+
+# Obtener la ruta del último archivo creado
+ruta_diario = 'C:\\Users\\damian.pulgarin\\OneDrive - arus.com.co\\ASIGNACION PBS\\DIARIO'
+ultimo_archivo = max(os.listdir(ruta_diario), key=os.path.getctime)
+ruta_ultimo_archivo = os.path.join(ruta_diario, ultimo_archivo)
+
+# Leer el archivo del consolidado general PBS
+df_consolidado = pd.read_csv(archivo_consolidado, delimiter=';', low_memory=False)
+
+# Leer el último archivo del diario
+df_diario = pd.read_excel(ruta_ultimo_archivo)
+
+# Columnas relevantes para el cruce
+columnas_relevantes_consolidado = ['ENVIO A SURA', 'RESPONSABLE', 'ASIGNACIÓN', 'FECHA DE ENVIÓ ARUS', 'NUMERO DE ENVIO']
+columnas_relevantes_diario = ['AUTORIZAR_SN', 'OBSERVACIONES', 'CAUSA_INACTIVACION', 'RESPONSABLE', 'ASIGNACIÓN', 'FECHA ENVIO ARUS']
+
+# Realizar el cruce del consolidado con el último archivo del diario
+df_cruce = pd.merge(df_consolidado[columnas_relevantes_consolidado], df_diario[columnas_relevantes_diario], on=['RESPONSABLE', 'ASIGNACIÓN', 'FECHA ENVIO ARUS'], how='left')
+
+# Guardar el resultado del cruce en un nuevo archivo
+archivo_resultado = 'CRUCE_CONSOLIDADO_DIARIO.xlsx'
+df_cruce.to_excel(archivo_resultado, index=False)
+
+#######################################################
+########################################################
+#########################################################
+
+# Columnas relevantes para el cruce con asignaciones
+columnas_relevantes_asignacion = ['AUTORIZAR_SN', 'OBSERVACIONES', 'CAUSA_INACTIVACION']
+
+# Realizar el cruce del consolidado con el último archivo del diario (asignaciones)
+df_cruce_asignacion = pd.merge(df_consolidado, df_diario[columnas_relevantes_asignacion], left_on='ASIGNACIÓN', right_on='AUTORIZAR_SN', how='left')
+
+# Carpeta "RESULTADOS" para guardar los archivos generados
+ruta_resultados = 'C:\\Users\\damian.pulgarin\\OneDrive - arus.com.co\\ASIGNACION PBS\\RESULTADOS'
+
+# Crear las carpetas dentro de "RESULTADOS" si no existen
+carpetas_resultados = ['CRUZO', 'enviot', 'inconsistenciasqf', 'NO CRUZO', 'nocruzoEnvioVSConpbs', 'REPARTO']
+for carpeta in carpetas_resultados:
+    ruta_carpeta = os.path.join(ruta_resultados, carpeta)
+    if not os.path.exists(ruta_carpeta):
+        os.makedirs(ruta_carpeta)
+
+# Filtrar las filas según las condiciones de las columnas y guardar en los archivos correspondientes
+df_cruce_asignacion['AUTORIZAR_SN'] = df_cruce_asignacion['AUTORIZAR_SN'].astype(str).str.strip()
+df_cruce_asignacion['OBSERVACIONES'] = df_cruce_asignacion['OBSERVACIONES'].astype(str).str.strip()
+
+# Filtro para las columnas B y C
+filtro_B = df_cruce_asignacion['AUTORIZAR_SN'].isin(['A', 'G', 'N', 'P', 'S', 'SICODIGO'])
+filtro_C = df_cruce_asignacion['OBSERVACIONES'].isin(['PRESCRIPCIÓN ERRADA', 'LA INDICACIÓN DE USO DEL MEDICAMENTO NO ESTÁ APROBADA POR EL INVIMA', 'MEDICAMENTO AGOTADO/DESABASTECIDO', 'SUPERA DOSIS FARMACOLÓGICA', 'NO INDICADO PARA EDAD', 'EXISTE EVIDENCIA DE INTERACCIÓN O REACCIÓN MEDICAMENTOSA', 'NO SE ENCUENTRAN SOPORTES', 'PRESTACIÓN YA AUTORIZADA', 'EXCLUSIÓN DEL PLAN DE BENEFICIOS EN SALUD (TEMAS ESTÉTICOS)', 'JUSTIFICACIÓN INSUFICIENTE', 'PRESCRIPCIÓN REQUIERE SEGUNDO CONCEPTO', 'PRESCRIPCIÓN SUPERA ETAPA DE TRATAMIENTO', 'SOPORTES INSUFICIENTES O INCORRECTOS', 'PENDIENTE VALIDACIÓN ENFERMEDAD HUÉRFANA'])
+
+# Generar los archivos correspondientes según las condiciones
+df_cruce_asignacion[filtro_B].to_excel(os.path.join(ruta_resultados, 'enviot', 'Archivo_envio_t.xlsx'), index=False)
+df_cruce_asignacion[~filtro_B].to_excel(os.path.join(ruta_resultados, 'inconsistenciasqf', 'Archivo_inconsistenciasqf.xlsx'), index=False)
+df_cruce_asignacion[filtro_B & filtro_C].to_excel(os.path.join(ruta_resultados, 'enviot', 'Archivo_enviot.xlsx'), index=False)
+df_cruce_asignacion[~filtro_B | ~filtro_C].to_excel(os.path.join(ruta_resultados, 'inconsistenciasqf', 'Archivo_inconsistenciasqf.xlsx'), index=False)
+
+# Resto del proceso para generar los archivos en la carpeta "RESULTADOS" (carpetas CRUZO, NO CRUZO, nocruzoEnvioVSConpbs, REPARTO, etc.)
+# ...
